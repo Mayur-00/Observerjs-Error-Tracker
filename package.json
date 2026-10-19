@@ -9,6 +9,8 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
     "prettier": "3.9.6",
     "turbo": "^2.11.9",
     "typescript": "7.0.2"
@@ -19,7 +21,7 @@
   "devEngines": {
     "packageManager": {
       "name": "npm",
-      "version": "11.6.4"
+      "version": "^11.6.4"
     }
   },
   "workspaces": [
