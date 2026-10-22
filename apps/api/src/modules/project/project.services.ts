@@ -1,7 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, sum } from "drizzle-orm";
 import { DB } from "../../db";
 import { Logger } from "winston";
-import { apiKey, project } from "../../db/schema";
+import { apiKey, error, project } from "../../db/schema";
 
 export class ProjectService {
   constructor(
@@ -41,7 +41,7 @@ export class ProjectService {
     return newApiKey;
   }
 
-  async getProjectWithActiveKeysSql(project_Id: string) {
+  async getProjectWithActiveKey(project_Id: string, user_id:string) {
     const [result] = await this.dbClient
       .select({
         projectId: project.id,
@@ -56,8 +56,28 @@ export class ProjectService {
         apiKey,
         and(eq(apiKey.projectId, apiKey.id), eq(apiKey.isActive, true)),
       )
-      .where(eq(project.id, project_Id));
+      .where(and(eq(project.id, project_Id), eq(project.ownerId, user_id)));
 
     return result;
+  }
+
+  async getAllProjectsWithUserId( user_id:string) {
+   return await this.dbClient
+    .select({
+      projectId: project.id,
+      projectName: project.name,
+      createdAt: project.createdAt,
+      // 1. Count total error rows for this project
+      totalErrorRows: count(error.id),
+      // 2. Sum up all event counts across those error rows
+      totalEventCount: sum(error.eventCount),
+    })
+    .from(project)
+    // Use leftJoin so projects with 0 errors still show up in the list
+    .leftJoin(error, eq(error.projectId, project.id))
+    // Filter by the user who owns the project (ownerId)
+    .where(eq(project.ownerId, user_id))
+    // Group by project fields to allow aggregate functions to run per project
+    .groupBy(project.id, project.name, project.createdAt);
   }
 }

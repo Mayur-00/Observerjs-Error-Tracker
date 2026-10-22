@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth, userRateLimiter } from "./config";
-import { handleError } from "./middlewares";
+import { handleError, requireAuth } from "./middlewares";
 import { projectRoutes } from "./modules/project";
 
 export const app = express();
@@ -25,7 +25,7 @@ app.get('/health', (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-app.use('/api/v1/user', userRateLimiter)
+app.use('/api/v1/user', userRateLimiter, requireAuth)
 
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 app.use('/api/v1/user/project', projectRoutes);

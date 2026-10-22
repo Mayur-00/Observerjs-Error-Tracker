@@ -6,7 +6,8 @@ import { ProjectController } from './project.controller.js';
 export function createProjectRouts(controller: ProjectController): Router {
   const router = Router();
 
-  // OAuth flow
-  router.post('/create', requireAuth, controller.createProject);
+  router.post('/', requireAuth, controller.createProject);
+  router.get('/:project_id', requireAuth, controller.getProject);
+  router.get('/all', requireAuth, controller.getAllProjects);
   return router;
 }

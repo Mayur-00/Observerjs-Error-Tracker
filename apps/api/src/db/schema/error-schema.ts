@@ -10,7 +10,7 @@ export const error = pgTable("error", {
   errorName: text("error_name").notNull(),
   errorType: text("error_type").notNull(),
   message: text("message").notNull(),
-  eventCount: integer("event_count").notNull().default(1),
+  eventCount: integer("event_count").notNull().default(1), 
   stack: text("stack").notNull(),
   projectId: uuid("project_id")
     .notNull()

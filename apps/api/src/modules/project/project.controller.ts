@@ -44,7 +44,7 @@ export class ProjectController {
       const newApiKeyTable = await this.projectServices.createNewApiKeyTable(
         createdProject.id,
         apiKeyHash,
-        apiKeyObj.preview
+        apiKeyObj.preview,
       );
 
       if (newApiKeyTable === undefined) {
@@ -55,7 +55,7 @@ export class ProjectController {
       this.logger.info("A new project Created Successfully");
       res
         .status(201)
-        .json(new ApiResponse(200, { apikey: apiKeyObj.rawkey }, "Success"));
+        .json(new ApiResponse(201, { apikey: apiKeyObj.rawkey }, "Success"));
     },
   );
   getProject: RequestHandler = asyncHandler(
@@ -67,35 +67,36 @@ export class ProjectController {
         throw new ApiError(401, "Unauthorized");
       }
 
-      const { project_id } = getProjectSchema.parse(req.body);
+      const { project_id } = getProjectSchema.parse(req.params);
 
-      const createdProject = await this.projectServices.createNewProject(
+      const fetchedProject = await this.projectServices.getProjectWithActiveKey(
+        project_id,
         user.id,
-        name,
       );
 
-      if (createdProject === undefined) {
-        this.logger.error("Failed To Create Project");
-        throw new ApiError(500, "internal server error");
+      if (fetchedProject === undefined) {
+        this.logger.error(`Project Not Found`);
+        throw new ApiError(404, "Project Not Fount");
       }
 
-      const rawApiKey = GenerateApikey(createdProject.id);
-      const apiKeyHash = hashRawApikey(rawApiKey);
+      this.logger.info(" project found successfully");
+      res.status(200).json(new ApiResponse(200, fetchedProject, "Success"));
+    },
+  );
+  getAllProjects: RequestHandler = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user = req.user;
 
-      const newApiKeyTable = await this.projectServices.createNewApiKeyTable(
-        createdProject.id,
-        apiKeyHash,
-      );
-
-      if (newApiKeyTable === undefined) {
-        this.logger.error("Failed To Entry new ApiKey To the Db");
-        throw new ApiError(500, "internal server error");
+      if (user === undefined) {
+        this.logger.error("unauthorized Request");
+        throw new ApiError(401, "Unauthorized");
       }
 
-      this.logger.info("A new project Created Successfully");
-      res
-        .status(201)
-        .json(new ApiResponse(200, { apikey: rawApiKey }, "Success"));
+      const fetchedProject =
+        await this.projectServices.getAllProjectsWithUserId(user.id);
+
+      this.logger.info(" project found successfully");
+      res.status(200).json(new ApiResponse(200, fetchedProject, "Success"));
     },
   );
 }
