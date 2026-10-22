@@ -3,6 +3,7 @@ import { relations } from "drizzle-orm";
 import { account, session, user } from "./auth-schema.js";
 import { error } from "./error-schema.js";
 import { project } from "./project-schema.js";
+import { apiKey } from "./apiKey-schema.js";
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
@@ -30,11 +31,19 @@ export const projectRelations = relations(project, ({ many, one }) => ({
     references: [user.id],
   }),
   errors: many(error),
+  apiKeys: many(apiKey),
 }));
 
 export const errorRelations = relations(error, ({ one }) => ({
   project: one(project, {
     fields: [error.projectId],
+    references: [project.id],
+  }),
+}));
+
+export const apiKeyRelations = relations(apiKey, ({ one }) => ({
+  project: one(project, {
+    fields: [apiKey.projectId],
     references: [project.id],
   }),
 }));

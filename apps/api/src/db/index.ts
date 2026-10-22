@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from "./schema/index.js";
 
 // Custom configuration for connection thresholds
@@ -12,3 +12,4 @@ export const dbpool = new Pool({
 });
 
 export const db = drizzle({ client: dbpool, schema });
+export type DB = NodePgDatabase<typeof schema>;

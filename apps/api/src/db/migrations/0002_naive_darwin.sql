@@ -1,0 +1,1 @@
+ALTER TABLE "apiKey" ADD COLUMN "api_key_preview" text NOT NULL;
