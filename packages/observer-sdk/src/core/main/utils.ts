@@ -1,7 +1,17 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { IDeviceContext } from "./types.js";
+import os from "os";
 
 export function sanitizeBody(body: any) {
   if (!body || typeof body !== "object") return body;
-  const sensitiveKeys = ["password", "token", "secret", "authorization", "creditCard"];
+  const sensitiveKeys = [
+    "password",
+    "token",
+    "secret",
+    "authorization",
+    "creditCard",
+  ];
 
   const sanitized = { ...body };
   for (const key of Object.keys(sanitized)) {
@@ -12,8 +22,54 @@ export function sanitizeBody(body: any) {
     }
   }
   return sanitized;
-};
+}
 
-export function extractErrorLocationFromStackTrace(stack:string){
-    return stack.split(' at ')[1].split('///')[1];
+export interface StackLocation {
+  file: string;
+  line: number;
+  column: number;
+}
+
+// matches "at fn (<loc>:line:col)" and "at <loc>:line:col"
+const FRAME_RE = /^\s*at (?:.+? \()?(.+?):(\d+):(\d+)\)?\s*$/;
+
+export function extractErrorLocation(
+  stack?: string,
+): StackLocation | undefined {
+  if (!stack) return undefined;
+
+  for (const raw of stack.split("\n")) {
+    const m = FRAME_RE.exec(raw);
+    if (!m) continue; // message lines, "at <anonymous>", etc.
+
+    let file = m[1];
+
+    // skip Node internals and dependencies; we want the first *user* frame
+    if (file.startsWith("node:") || file.includes("node_modules")) continue;
+
+    // ESM frames are file:// URLs; CJS frames are plain paths
+    if (file.startsWith("file://")) {
+      try {
+        file = fileURLToPath(file); // also handles file:///C:/... on Windows
+      } catch {
+        continue;
+      }
+    }
+
+    // relative to the app root: stable across machines, doesn't leak home dirs
+    file = path.relative(process.cwd(), file).split(path.sep).join("/");
+
+    return { file, line: Number(m[2]), column: Number(m[3]) };
+  }
+  return undefined; // never throw from inside the error reporter
+}
+
+export function getDeviceContext(enviroment: string): IDeviceContext {
+  return {
+    os: os.platform(),
+    osVersion: os.release(),
+    environment: enviroment,
+    platform: "NodeJs",
+    platformVersion: process.version,
+  };
 }

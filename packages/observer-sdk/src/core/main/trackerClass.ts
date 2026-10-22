@@ -1,5 +1,10 @@
-import { TrackerConfig, ErrorPayload, ReqContext } from "./types.js";
-import { extractErrorLocationFromStackTrace } from "./utils.js";
+import {
+  TrackerConfig,
+  ErrorPayload,
+  IReqContext,
+  IErrorContext,
+} from "./types.js";
+import { extractErrorLocation, getDeviceContext } from "./utils.js";
 
 export class ErrorTracker {
   protected config: TrackerConfig;
@@ -9,7 +14,11 @@ export class ErrorTracker {
     if (!config) {
       throw new Error("[Observer SDK] Config is Required.");
     }
-    this.config = config;
+    this.config = {
+      environment: config.environment ?? "development",
+      apiKey: config.apiKey,
+      endpoint: config.endpoint,
+    };
     this.isSending = false;
     this.setupGlobalHandlers();
   }
@@ -39,26 +48,30 @@ export class ErrorTracker {
    * Manually capture an error and forward it to the endpoint.
    */
 
-  public captureException(error: Error, context?: ReqContext): void {
+  public captureException(error: Error, context?: IReqContext): void {
     if (!this.config) {
       console.error("[Observer SDK] Config is Required.");
       return;
     }
-    const errorLocation = extractErrorLocationFromStackTrace(error.stack!);
+    const locationObj = extractErrorLocation(error.stack!);
+    const deviceContext = getDeviceContext(this.config.environment);
+    const errorContext: IErrorContext = {
+      errorType: error.name,
+      message: error.message,
+      stackTrace: error.stack!,
+      filePath: locationObj?.file || "",
+      errorLineNumber: locationObj?.line || 0,
+      errorColomnNumber: locationObj?.column || 0,
+    };
+
     const payload: ErrorPayload = {
-      apiKey: this.config.apiKey,
-      name: error.name,
-      message: error.message || "Unknown Error",
-      stack: error.stack,
-      location: errorLocation,
-      environment: this.config.environment!,
+      errorContext,
+      deviceContext,
+      reqContext: context,
       timestamp: new Date().toISOString(),
-      userAgent:
-        typeof navigator !== "undefined" ? navigator.userAgent : "Node.js",
-      context,
     };
     console.log(payload);
-    console.log("error location:", errorLocation);
+    console.log("error location:", locationObj?.file);
     this._send(payload);
   }
 
@@ -66,18 +79,18 @@ export class ErrorTracker {
    * Non-blocking HTTP POST request sending error data to the collection server.
    */
 
- protected _send(payload: ErrorPayload): void {
+  protected _send(payload: ErrorPayload): void {
     if (!this.config) {
       console.error("[Observer SDK] Config is Required.");
       return;
     }
-    
+
     if (this.isSending) {
       return; // Drop packet if already transmitting
     }
 
     this.isSending = true;
-    console.log("sending request :", payload.message);
+    console.log("sending request :", payload.errorContext.message);
 
     fetch(this.config.endpoint, {
       method: "POST",
