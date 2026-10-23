@@ -1,0 +1,1 @@
+ALTER TABLE "error" ALTER COLUMN "platform-version" SET DATA TYPE integer;

@@ -54,7 +54,7 @@ export class ProjectService {
       .from(project)
       .innerJoin(
         apiKey,
-        and(eq(apiKey.projectId, apiKey.id), eq(apiKey.isActive, true)),
+        and(eq(apiKey.projectId, project.id), eq(apiKey.isActive, true)),
       )
       .where(and(eq(project.id, project_Id), eq(project.ownerId, user_id)));
 

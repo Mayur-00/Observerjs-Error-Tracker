@@ -7,8 +7,8 @@ import { SdkService } from "./sdk.services.js";
 export * from "./sdk.types.js";
 export * from './sdk.dto.js';
 
-export const sdkServices = new SdkService(db, logger);
+export const sdkService = new SdkService(db, logger);
 
-export const sdkController = new SdkController(sdkServices, logger);
+export const sdkController = new SdkController(sdkService, logger);
 
 export const sdkRoutes = createSdkRoutes(sdkController);

@@ -55,7 +55,7 @@ export class ProjectController {
       this.logger.info("A new project Created Successfully");
       res
         .status(201)
-        .json(new ApiResponse(201, { apikey: apiKeyObj.rawkey }, "Success"));
+        .json(new ApiResponse(201, { apikey: apiKeyObj.rawkey, endpoint:`${process.env.DOMIAN}/api/v1/sdk` }, "Success"));
     },
   );
   getProject: RequestHandler = asyncHandler(

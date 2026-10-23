@@ -1,0 +1,1 @@
+ALTER TABLE "error" DROP CONSTRAINT "error_error_hash_unique";

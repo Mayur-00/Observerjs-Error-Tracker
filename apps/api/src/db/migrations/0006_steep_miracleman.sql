@@ -1,0 +1,1 @@
+ALTER TABLE "error" RENAME COLUMN "location" TO "file-path";

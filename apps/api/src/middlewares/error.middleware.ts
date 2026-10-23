@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiError, IApiError } from "../utils/apiErrorClass.js";
 import { ZodError } from "zod";
-import logger from "../config/logger.js";
+import {logger} from "../config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 

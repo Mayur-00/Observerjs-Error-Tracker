@@ -30,9 +30,8 @@ return (
       const context = {
         method: _req.method, // e.g., "POST", "GET"
         route: _req.originalUrl || _req.path, // e.g., "/api/users"
-        query: _req.query || {}, // URL query parameters
 
-        userAgent: _req.get("user-agent") || null,
+        userAgent: _req.get("user-agent")!,
       };
       client.captureException((error as Error), context);
     }

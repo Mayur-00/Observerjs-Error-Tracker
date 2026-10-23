@@ -1,0 +1,1 @@
+ALTER TABLE "error" ADD COLUMN "req-method" text;

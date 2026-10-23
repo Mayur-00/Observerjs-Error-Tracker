@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { IDeviceContext } from "./types.js";
 import os from "os";
+import { IDeviceContext } from "./types.js";
 
 export function sanitizeBody(body: any) {
   if (!body || typeof body !== "object") return body;

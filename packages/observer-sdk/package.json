@@ -1,6 +1,6 @@
 {
   "name": "@observer-js/express",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The official Observerjs SDK for monitoring express.js applications.",
   "license": "ISC",
   "author": "mayur kendre",

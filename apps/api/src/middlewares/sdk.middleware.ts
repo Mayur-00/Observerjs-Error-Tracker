@@ -23,9 +23,7 @@ export const verifykey = async (req: Request, res: Response, next: NextFunction)
   // select specific rows from the apiKey table and, query with the conditions like: match the apikey field and isActive field should be true
   const [dbResponse] = await db
     .select({
-      id: apiKey.id,
       projectId: apiKey.projectId,
-      isActive: apiKey.isActive,
     })
     .from(apiKey)
     .where(and(eq(apiKey.apiKey, hash), eq(apiKey.isActive, true)));

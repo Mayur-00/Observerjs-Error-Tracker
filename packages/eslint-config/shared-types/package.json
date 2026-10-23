@@ -1,0 +1,9 @@
+{
+  "name": "@repo/types",
+  "version": "0.0.0",
+  "private": true,
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts" } },
+  "scripts": { "build": "tsc", "dev": "tsc --watch" },
+  "devDependencies": { "@repo/typescript-config": "*" }
+}
